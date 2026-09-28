@@ -1,0 +1,1312 @@
+{
+  "name": "ContractOps 02 - Renewal Decision",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "ContractOps - Renewal Decision",
+        "formDescription": "Record the required action for a contract approaching its renewal or notice deadline.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Contract ID",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Renewal Decision",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Renew unchanged"
+                  },
+                  {
+                    "option": "Renew with amendments"
+                  },
+                  {
+                    "option": "Do not renew"
+                  },
+                  {
+                    "option": "Terminate early"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Business Comments",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ffb1cbe9-5cea-4da3-beb5-50b6793bb318",
+      "name": "On form submission"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "fileId": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "999f4e95-eb97-4a91-9ac4-2687bae38be8",
+      "name": "Get a file"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "getRows",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{00000000-0001-0000-0000-000000000000}",
+          "mode": "list",
+          "cachedResultName": "Contract Register"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{00000000-000C-0000-FFFF-FFFF00000000}",
+          "mode": "list",
+          "cachedResultName": "ContractRegister"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "2ab90350-8a31-428f-bb61-1fc81790a26e",
+      "name": "Get rows"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "61dda7de-9b81-4e5b-8f69-d800441f0bf2",
+              "leftValue": "={{ $json['Contract ID'] }}",
+              "rightValue": "={{ $('On form submission').first().json['Contract ID'] }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        0
+      ],
+      "id": "1269221b-b152-4b79-8630-0c6b849aed0c",
+      "name": "Find Submitted Contract"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "007b71da-2696-44a0-86ef-d1355efca5b5",
+              "name": "Contract ID",
+              "value": "={{ $json['Contract ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "81f8182c-9d5b-4ac7-ae3d-451b39ef036f",
+              "name": "Supplier",
+              "value": "={{ $json.Supplier }}",
+              "type": "string"
+            },
+            {
+              "id": "14f96aeb-cfaf-4971-b80c-a1ba1abe9da4",
+              "name": "Business Owner",
+              "value": "={{ $json['Business Owner'] }}",
+              "type": "string"
+            },
+            {
+              "id": "a7e46157-9e58-4412-80ea-667ac2630926",
+              "name": "Contract Manager/Associate",
+              "value": "={{ $json['Contract Manager/Associate'] }}",
+              "type": "string"
+            },
+            {
+              "id": "d877941f-dad4-4b5a-85a6-682e305cd6f4",
+              "name": "Current Contract Value",
+              "value": "={{ $json['Current Contract Value'] }}",
+              "type": "number"
+            },
+            {
+              "id": "6eb64db8-21d9-4084-9895-844da1e0e2a1",
+              "name": "Expiry Date",
+              "value": "={{ $json['Expiry Date'] }}",
+              "type": "number"
+            },
+            {
+              "id": "9869fba4-3a91-44a2-8ac6-f67d8db17edb",
+              "name": "Auto-Renewal Clause?",
+              "value": "={{ $json['Auto-Renewal Clause?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "4e9600cd-07ab-480c-ac12-f3cbe8ef00b2",
+              "name": "Personal Data",
+              "value": "={{ $json['Personal Data'] }}",
+              "type": "string"
+            },
+            {
+              "id": "858cabe6-9565-4d4d-a9af-fc3dd329de7d",
+              "name": "Risk Tier",
+              "value": "={{ $json['Risk Tier'] }}",
+              "type": "string"
+            },
+            {
+              "id": "31d76666-750b-4e78-8ade-c3225c39ac3d",
+              "name": "Renewal Decision",
+              "value": "={{ $('On form submission').first().json['Renewal Decision'] }}",
+              "type": "string"
+            },
+            {
+              "id": "42d1a998-d6f9-4661-bc13-a0eff3675f1b",
+              "name": "Business Comments",
+              "value": "={{ $('On form submission').first().json['Business Comments'] }}",
+              "type": "string"
+            },
+            {
+              "id": "b15cf179-bb76-4545-b4f0-1c68f96f8f1e",
+              "name": "submittedAt",
+              "value": "={{ $('On form submission').first().json.submittedAt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        896,
+        0
+      ],
+      "id": "43daa4e3-7b8a-4363-a969-bde5ad7e2a6a",
+      "name": "Prepare Decision Context"
+    },
+    {
+      "parameters": {
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Proposed Revised Contract Value",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Proposed New Expiry Date",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Amendment Description",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Does Amendment incl. Personal Data Processing?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes"
+                  },
+                  {
+                    "option": "No"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "formDescription": "Describe the proposed change to services, scope, pricing or other contractual terms."
+        }
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        1504,
+        16
+      ],
+      "id": "9453fd0c-9c1d-4aac-9083-7e4183955562",
+      "name": "Collect Amendment Details"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4f4724d3-1e54-44fe-b4ea-0eddf828cd27",
+              "name": "amendment_request_id",
+              "value": "={{ \"AMD-\" + $('Switch by Renewal Decision').item.json['Contract ID'] + \"-\" + $('Collect Amendment Details').item.json[\"submittedAt\"].replace(/\\D/g, \"\").slice(0,14) }}",
+              "type": "string"
+            },
+            {
+              "id": "98a54745-cc49-44c9-9157-e230b231bb9d",
+              "name": "contract_id",
+              "value": "={{ $('Prepare Decision Context').item.json['Contract ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "9462df35-7e84-4b3d-8789-b23110ba195b",
+              "name": "supplier",
+              "value": "={{ $('Prepare Decision Context').item.json.Supplier }}",
+              "type": "string"
+            },
+            {
+              "id": "45877b74-ad0a-45ce-98bb-ed55c1726d27",
+              "name": "current_contract_value",
+              "value": "={{ $('Prepare Decision Context').item.json['Current Contract Value'] }}",
+              "type": "number"
+            },
+            {
+              "id": "3454e2c4-f6be-4b24-9b58-f232b692c50f",
+              "name": "proposed_contract_value",
+              "value": "={{ $json['Proposed Revised Contract Value'] }}",
+              "type": "number"
+            },
+            {
+              "id": "afcf039c-9773-485f-9532-cbb3821829ad",
+              "name": "value_increase",
+              "value": "={{ $json['Proposed Revised Contract Value'] - $('Prepare Decision Context').item.json['Current Contract Value']}}",
+              "type": "number"
+            },
+            {
+              "id": "d6c515ac-6c37-4064-9b23-71c19690da06",
+              "name": "proposed_expiry_date",
+              "value": "={{ $json['Proposed New Expiry Date'] }}",
+              "type": "string"
+            },
+            {
+              "id": "9ac63e8d-d389-48d7-85ac-c6ed07fbea86",
+              "name": "amendment_description",
+              "value": "={{ $json['Amendment Description'] }}",
+              "type": "string"
+            },
+            {
+              "id": "896716a6-dba7-40c9-b90f-133363ce934b",
+              "name": "current_personal_data",
+              "value": "={{ $('Prepare Decision Context').item.json['Personal Data'] }}",
+              "type": "string"
+            },
+            {
+              "id": "4abad91c-284a-4378-b279-b94cd8bb5a0b",
+              "name": "proposed_personal_data",
+              "value": "={{ $json['Does Amendment incl. Personal Data Processing?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "98232aae-3471-40e0-95bc-6cc7335aa69f",
+              "name": "contracts_approval_required",
+              "value": "={{ ($json['Proposed Revised Contract Value'] - $('Prepare Decision Context').item.json['Current Contract Value']) > 10000}}",
+              "type": "boolean"
+            },
+            {
+              "id": "6021f7c4-3d86-443f-ba80-17d746cb2105",
+              "name": "finance_approval_required",
+              "value": "={{ $json['Proposed Revised Contract Value'] > 100000 }}",
+              "type": "boolean"
+            },
+            {
+              "id": "cb76d8b3-3395-4238-8f25-8a84e20e4600",
+              "name": "data_protection_review_required",
+              "value": "={{ $('Prepare Decision Context').item.json['Personal Data'] === 'No' && $json['Does Amendment incl. Personal Data Processing?'] === 'Yes'  }}",
+              "type": "boolean"
+            },
+            {
+              "id": "e511c80b-15ef-4e54-8e40-644ca672fe3e",
+              "name": "any_approval_required",
+              "value": "={{ \n(($json[\"Proposed Revised Contract Value\"] - $('Prepare Decision Context').item.json[\"Current Contract Value\"]) > 10000)\n||\n($json[\"Proposed Revised Contract Value\"] > 100000)\n||\n($('Prepare Decision Context').item.json[\"Personal Data\"] === \"No\" && $json[\"Does Amendment incl. Personal Data Processing?\"] === \"Yes\")\n }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1856,
+        16
+      ],
+      "id": "4b3c5e2b-e0fe-4cbf-b506-40b17601f788",
+      "name": "Calculate Amendment Impact"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7c7319a5-70df-432f-8976-cd2e6fe46b78",
+              "leftValue": "={{ $json.contracts_approval_required }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2224,
+        -208
+      ],
+      "id": "f5996f48-5bb2-4a62-8eb0-0740f7e2ae2f",
+      "name": "Contracts Approval required?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "034bde69-3297-4dc7-a8a1-007ddd964b1b",
+              "leftValue": "={{ $json.finance_approval_required }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2256,
+        16
+      ],
+      "id": "8fbfc101-be0e-4930-8e1c-a4bcfd320c6a",
+      "name": "Finance Approval required?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cf3d806b-1aff-4739-ac77-e302f5c39a23",
+              "leftValue": "={{ $json.data_protection_review_required }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2240,
+        240
+      ],
+      "id": "eb170d9a-30fc-46a6-a85d-a5effde44315",
+      "name": "Data Protection Review required?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eae82bf8-36a7-4b38-a936-bee15e3d413f",
+              "name": "approval_request_id",
+              "value": "={{ $json.amendment_request_id + \"-CONTRACT\" }}",
+              "type": "string"
+            },
+            {
+              "id": "4d531dec-54b0-465a-b189-75e03dbdce4c",
+              "name": "approval_type",
+              "value": "Contracts",
+              "type": "string"
+            },
+            {
+              "id": "a3cc8cdf-71b9-47ba-ab83-1063b2484cba",
+              "name": "approval_status",
+              "value": "Pending",
+              "type": "string"
+            },
+            {
+              "id": "d2478e97-23ed-4d91-9953-ec0c782b03b9",
+              "name": "approver_role",
+              "value": "Contracts Approver",
+              "type": "string"
+            },
+            {
+              "id": "fd37fa5b-7281-409f-a8ee-396ef62b8487",
+              "name": "approval_reason",
+              "value": "={{ \"Proposed contract value increase of £\" + $('Calculate Amendment Impact').item.json.value_increase.toLocaleString(\"en-GB\") + \" exceeds the £10,000 Contracts approval threshold.\" }}",
+              "type": "string"
+            },
+            {
+              "id": "00216713-1e56-40cf-ba73-e6668fb43028",
+              "name": "approval_url",
+              "value": "={{\n'http://localhost:5678/form/REPLACE_WITH_WORKFLOW_03_FORM_ID'\n+ '?approval_request_id='\n+ encodeURIComponent(\n  $json.amendment_request_id + '-CONTRACTS'\n)\n}}",
+              "type": "string"
+            },
+            {
+              "id": "b6927d90-3b49-4d3f-821e-19fea71205c0",
+              "name": "requested_at",
+              "value": "={{\nDate.UTC(\n  $now.setZone(\"Europe/London\").year,\n  $now.setZone(\"Europe/London\").month - 1,\n  $now.setZone(\"Europe/London\").day,\n  $now.setZone(\"Europe/London\").hour,\n  $now.setZone(\"Europe/London\").minute,\n  $now.setZone(\"Europe/London\").second\n) / 86400000 + 25569\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2416,
+        -432
+      ],
+      "id": "93395704-8875-44b0-a0f4-bbc525208e22",
+      "name": "Build Contract Approvals Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "215743c5-52d5-4825-8d50-d7781a7fd9a9",
+              "name": "approval_request_id",
+              "value": "={{ $json.amendment_request_id + \"-FINANCE\"}}",
+              "type": "string"
+            },
+            {
+              "id": "8d418906-bd59-4f51-be16-e2dac1c04c5c",
+              "name": "approval_type",
+              "value": "Finance",
+              "type": "string"
+            },
+            {
+              "id": "67e7951d-1988-44c7-8771-7f6cfff3b0e6",
+              "name": "approval_status",
+              "value": "Pending",
+              "type": "string"
+            },
+            {
+              "id": "91494451-931d-49ef-8ecf-769e027250b2",
+              "name": "approver_role",
+              "value": "Finance Approver",
+              "type": "string"
+            },
+            {
+              "id": "5772855f-abcd-4baf-af7c-ea7fa0ebf391",
+              "name": "approval_reason",
+              "value": "={{ \"Proposed revised contract value of £\" + $('Calculate Amendment Impact').item.json.proposed_contract_value.toLocaleString(\"en-GB\") + \" exceeds the £100,000 finance approval threshold.\" }}",
+              "type": "string"
+            },
+            {
+              "id": "7363339f-16e5-473c-b2d8-52f5d126fea8",
+              "name": "approval_url",
+              "value": "={{\n'http://localhost:5678/form/REPLACE_WITH_WORKFLOW_03_FORM_ID'\n+ '?approval_request_id='\n+ encodeURIComponent(\n  $json.amendment_request_id + '-FINANCE'\n)\n}}",
+              "type": "string"
+            },
+            {
+              "id": "73640711-4368-43ed-8488-f1618353f0c8",
+              "name": "requested_at",
+              "value": "={{\nDate.UTC(\n  $now.setZone(\"Europe/London\").year,\n  $now.setZone(\"Europe/London\").month - 1,\n  $now.setZone(\"Europe/London\").day,\n  $now.setZone(\"Europe/London\").hour,\n  $now.setZone(\"Europe/London\").minute,\n  $now.setZone(\"Europe/London\").second\n) / 86400000 + 25569\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2480,
+        -80
+      ],
+      "id": "be70619c-047d-4dd3-bd41-de6a68cc56cd",
+      "name": "Build Finance Approval Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8fd96d9d-9e47-4a3e-af9d-57805a36785e",
+              "name": "approval_request_id",
+              "value": "={{ $json.amendment_request_id + \"-PRIVACY\" }}",
+              "type": "string"
+            },
+            {
+              "id": "b823d232-0a3d-453f-8637-92a81e8956c7",
+              "name": "approval_type",
+              "value": "Data Protection",
+              "type": "string"
+            },
+            {
+              "id": "95fe4b6f-fc83-4b2e-838e-fe76f17330b7",
+              "name": "approval_status",
+              "value": "Pending",
+              "type": "string"
+            },
+            {
+              "id": "2447f83f-9616-46b0-b1ab-284e2fb38c8a",
+              "name": "approver_role",
+              "value": "Data Protection Reviewer",
+              "type": "string"
+            },
+            {
+              "id": "d51f4c03-aebd-48a6-803c-548caa5b5738",
+              "name": "approval_reason",
+              "value": "The proposed amendment introduces personal data processing where the existing agreement did not include it.",
+              "type": "string"
+            },
+            {
+              "id": "9deaa63e-4d20-412b-a5fe-30c0baeb0e79",
+              "name": "approval_url",
+              "value": "={{\n'http://localhost:5678/form/REPLACE_WITH_WORKFLOW_03_FORM_ID'\n+ '?approval_request_id='\n+ encodeURIComponent(\n  $json.amendment_request_id + '-PRIVACY'\n)\n}}",
+              "type": "string"
+            },
+            {
+              "id": "5015a02f-a2ec-4c02-9432-f717b9ac5268",
+              "name": "requested_at",
+              "value": "={{\nDate.UTC(\n  $now.setZone(\"Europe/London\").year,\n  $now.setZone(\"Europe/London\").month - 1,\n  $now.setZone(\"Europe/London\").day,\n  $now.setZone(\"Europe/London\").hour,\n  $now.setZone(\"Europe/London\").minute,\n  $now.setZone(\"Europe/London\").second\n) / 86400000 + 25569\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2512,
+        224
+      ],
+      "id": "f9fb29e8-8056-4207-9425-363731169045",
+      "name": "Build Data Protection Review Request"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{AF49088E-6692-424E-9AF3-73AB3A69BD8B}",
+          "mode": "list",
+          "cachedResultName": "Approval Log"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{B4ACD572-08F2-4A66-A8D5-5AFC28CBEB44}",
+          "mode": "list",
+          "cachedResultName": "ApprovalLog"
+        },
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "Approval Request ID",
+              "fieldValue": "={{ $json.approval_request_id }}"
+            },
+            {
+              "column": "Amendment Request ID",
+              "fieldValue": "={{ $json.amendment_request_id }}"
+            },
+            {
+              "column": "Contract ID",
+              "fieldValue": "={{ $json.contract_id }}"
+            },
+            {
+              "column": "Supplier",
+              "fieldValue": "={{ $json.supplier }}"
+            },
+            {
+              "column": "Approval Type",
+              "fieldValue": "={{ $json.approval_type }}"
+            },
+            {
+              "column": "Approver Role",
+              "fieldValue": "={{ $json.approver_role }}"
+            },
+            {
+              "column": "Approval Status",
+              "fieldValue": "={{ $json.approval_status }}"
+            },
+            {
+              "column": "Approval Reason",
+              "fieldValue": "={{ $json.approval_reason }}"
+            },
+            {
+              "column": "Requested At",
+              "fieldValue": "={{ $json.requested_at }}"
+            },
+            {
+              "column": "Decision At"
+            },
+            {
+              "column": "Decision Comments"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        2640,
+        -432
+      ],
+      "id": "197abd1a-8847-4d83-8aae-d7b32d63af90",
+      "name": "Log Contracts Approval"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{AF49088E-6692-424E-9AF3-73AB3A69BD8B}",
+          "mode": "list",
+          "cachedResultName": "Approval Log"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{B4ACD572-08F2-4A66-A8D5-5AFC28CBEB44}",
+          "mode": "list",
+          "cachedResultName": "ApprovalLog"
+        },
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "Approval Request ID",
+              "fieldValue": "={{ $json.approval_request_id }}"
+            },
+            {
+              "column": "Amendment Request ID",
+              "fieldValue": "={{ $json.amendment_request_id }}"
+            },
+            {
+              "column": "Contract ID",
+              "fieldValue": "={{ $json.contract_id }}"
+            },
+            {
+              "column": "Supplier",
+              "fieldValue": "={{ $json.supplier }}"
+            },
+            {
+              "column": "Approval Type",
+              "fieldValue": "={{ $json.approval_type }}"
+            },
+            {
+              "column": "Approver Role",
+              "fieldValue": "={{ $json.approver_role }}"
+            },
+            {
+              "column": "Approval Status",
+              "fieldValue": "={{ $json.approval_status }}"
+            },
+            {
+              "column": "Approval Reason",
+              "fieldValue": "={{ $json.approval_reason }}"
+            },
+            {
+              "column": "Requested At",
+              "fieldValue": "={{ $json.requested_at }}"
+            },
+            {
+              "column": "Decision At"
+            },
+            {
+              "column": "Decision Comments"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        2704,
+        -80
+      ],
+      "id": "882e4b1a-b25f-466d-9f91-4662b4c424b9",
+      "name": "Log Finance Approval"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{AF49088E-6692-424E-9AF3-73AB3A69BD8B}",
+          "mode": "list",
+          "cachedResultName": "Approval Log"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{B4ACD572-08F2-4A66-A8D5-5AFC28CBEB44}",
+          "mode": "list",
+          "cachedResultName": "ApprovalLog"
+        },
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "Approval Request ID",
+              "fieldValue": "={{ $json.approval_request_id }}"
+            },
+            {
+              "column": "Amendment Request ID",
+              "fieldValue": "={{ $json.amendment_request_id }}"
+            },
+            {
+              "column": "Contract ID",
+              "fieldValue": "={{ $json.contract_id }}"
+            },
+            {
+              "column": "Supplier",
+              "fieldValue": "={{ $json.supplier }}"
+            },
+            {
+              "column": "Approval Type",
+              "fieldValue": "={{ $json.approval_type }}"
+            },
+            {
+              "column": "Approver Role",
+              "fieldValue": "={{ $json.approver_role }}"
+            },
+            {
+              "column": "Approval Status",
+              "fieldValue": "={{ $json.approval_status }}"
+            },
+            {
+              "column": "Approval Reason",
+              "fieldValue": "={{ $json.approval_reason }}"
+            },
+            {
+              "column": "Requested At",
+              "fieldValue": "={{ $json.requested_at }}"
+            },
+            {
+              "column": "Decision At",
+              "fieldValue": "="
+            },
+            {
+              "column": "Decision Comments"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        2736,
+        224
+      ],
+      "id": "78c6febb-ea27-4d3d-9040-25bd1de21e47",
+      "name": "Log Data Protection Approval"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{7B2CFAD2-4CF5-42B8-B200-E156AB0637A1}",
+          "mode": "list",
+          "cachedResultName": "Amendment Request Log"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{3E6FA594-856C-41FA-8BBD-E29AD3BE5DA2}",
+          "mode": "list",
+          "cachedResultName": "AmdRequests"
+        },
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "Amendment Request ID",
+              "fieldValue": "={{ $json.amendment_request_id }}"
+            },
+            {
+              "column": "Contract ID",
+              "fieldValue": "={{ $('Prepare Decision Context').item.json['Contract ID'] }}"
+            },
+            {
+              "column": "Supplier",
+              "fieldValue": "={{ $json.supplier }}"
+            },
+            {
+              "column": "Business Owner",
+              "fieldValue": "={{ $('Prepare Decision Context').item.json['Business Owner'] }}"
+            },
+            {
+              "column": "Contract Manager",
+              "fieldValue": "={{ $('Prepare Decision Context').item.json['Contract Manager/Associate'] }}"
+            },
+            {
+              "column": "Current Contract Value",
+              "fieldValue": "={{ $('Prepare Decision Context').item.json['Current Contract Value'] }}"
+            },
+            {
+              "column": "Proposed Contract Value",
+              "fieldValue": "={{ $json['Proposed Revised Contract Value'] }}"
+            },
+            {
+              "column": "Value Increase",
+              "fieldValue": "={{ $json.value_increase }}"
+            },
+            {
+              "column": "Current Expiry Date",
+              "fieldValue": "={{ $('Prepare Decision Context').item.json['Expiry Date'] }}"
+            },
+            {
+              "column": "Proposed Expiry Date",
+              "fieldValue": "={{ $('Collect Amendment Details').item.json['Proposed New Expiry Date'] }}"
+            },
+            {
+              "column": "Amendment Description",
+              "fieldValue": "={{ $json['Amendment Description'] }}"
+            },
+            {
+              "column": "Current Personal Data",
+              "fieldValue": "={{ $json.current_personal_data }}"
+            },
+            {
+              "column": "Proposed Personal Data",
+              "fieldValue": "={{ $('Collect Amendment Details').item.json['Does Amendment incl. Personal Data Processing?'] }}"
+            },
+            {
+              "column": "Contracts Approval Required",
+              "fieldValue": "={{ $json.contracts_approval_required }}"
+            },
+            {
+              "column": "Finance Approval Required",
+              "fieldValue": "={{ $json.finance_approval_required }}"
+            },
+            {
+              "column": "Data Protection Review Required",
+              "fieldValue": "={{ $json.data_protection_review_required }}"
+            },
+            {
+              "column": "Overall Approval Status",
+              "fieldValue": "={{ $json.any_approval_required ? \"Pending\" : \"Approved\"}}"
+            },
+            {
+              "column": "Submitted At",
+              "fieldValue": "={{ (() => {\nconst d = new Date($('Collect Amendment Details').first().json.submittedAt);\n\nconst london = new Intl.DateTimeFormat(\"en-GB\", {\n  timeZone: \"Europe/London\",\n  year: \"numeric\",\n  month: \"2-digit\",\n  day: \"2-digit\",\n  hour: \"2-digit\",\n  minute: \"2-digit\",\n  second: \"2-digit\",\n  hourCycle: \"h23\"\n}).formatToParts(d);\n\nconst p = Object.fromEntries(\n  london\n    .filter(x => x.type !== \"literal\")\n    .map(x => [x.type, Number(x.value)])\n);\n\nreturn Date.UTC(\n  p.year,\n  p.month - 1,\n  p.day,\n  p.hour,\n  p.minute,\n  p.second\n) / 86400000 + 25569;\n})() }}"
+            },
+            {
+              "column": "Approved At "
+            },
+            {
+              "column": "Document Status",
+              "fieldValue": "Not Ready"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        -432
+      ],
+      "id": "6b46c287-c891-4327-a150-ae6e5f5148db",
+      "name": "Log Amendment Request"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['Renewal Decision'] }}",
+                    "rightValue": "Renew unchanged",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "75b5890e-b738-4ac9-8299-2e4ed16945e3"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Renew unchanged"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f493fcf7-8aef-407b-9f28-ba05de6e5cbc",
+                    "leftValue": "={{ $json['Renewal Decision'] }}",
+                    "rightValue": "Renew with amendments",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Renew with amendments"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a941c09e-e354-43ae-8d05-e0b17b2113b1",
+                    "leftValue": "={{ $json['Renewal Decision'] }}",
+                    "rightValue": "Do not renew",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Do not renew"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f8e0e374-2afe-41c6-968e-ea909ac42022",
+                    "leftValue": "={{ $json['Renewal Decision'] }}",
+                    "rightValue": "Terminate early",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Terminate early"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "1e61fed9-946f-4e9f-a1f9-00f4352bc7ae",
+      "name": "Switch by Renewal Decision"
+    },
+    {
+      "parameters": {
+        "content": "Production enhancement: approval URLs delivered to assigned approvers via email/Teams."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1872,
+        -720
+      ],
+      "id": "2c8d8276-de48-44be-b0fd-8ac160be54fe",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Get rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get rows": {
+      "main": [
+        [
+          {
+            "node": "Find Submitted Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Submitted Contract": {
+      "main": [
+        [
+          {
+            "node": "Prepare Decision Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Decision Context": {
+      "main": [
+        [
+          {
+            "node": "Switch by Renewal Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Amendment Details": {
+      "main": [
+        [
+          {
+            "node": "Calculate Amendment Impact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Amendment Impact": {
+      "main": [
+        [
+          {
+            "node": "Contracts Approval required?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Finance Approval required?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Data Protection Review required?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Amendment Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contracts Approval required?": {
+      "main": [
+        [
+          {
+            "node": "Build Contract Approvals Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Finance Approval required?": {
+      "main": [
+        [
+          {
+            "node": "Build Finance Approval Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Protection Review required?": {
+      "main": [
+        [
+          {
+            "node": "Build Data Protection Review Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Contract Approvals Request": {
+      "main": [
+        [
+          {
+            "node": "Log Contracts Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Finance Approval Request": {
+      "main": [
+        [
+          {
+            "node": "Log Finance Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Data Protection Review Request": {
+      "main": [
+        [
+          {
+            "node": "Log Data Protection Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch by Renewal Decision": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Collect Amendment Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}

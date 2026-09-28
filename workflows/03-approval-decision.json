@@ -1,0 +1,421 @@
+{
+  "name": "ContractOps 03 - Approval Decision",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "ContractOps – Approval Decision",
+        "formFields": {
+          "values": [
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "approval_request_id"
+            },
+            {
+              "fieldLabel": "Approver Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Approval Decision",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Approve"
+                  },
+                  {
+                    "option": "Reject"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Decision Comments",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a618cf8a-2ecc-46d1-8757-a3f877a2fa90",
+      "name": "On form submission"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "getRows",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{AF49088E-6692-424E-9AF3-73AB3A69BD8B}",
+          "mode": "list",
+          "cachedResultName": "Approval Log"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{B4ACD572-08F2-4A66-A8D5-5AFC28CBEB44}",
+          "mode": "list",
+          "cachedResultName": "ApprovalLog"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c7392773-fce6-48ce-8d5f-6d3ce7907865",
+      "name": "Get rows"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cf6de748-7af3-40df-bb0e-bb043a0e2aef",
+              "leftValue": "={{ $json['Approval Status'] }}",
+              "rightValue": "Pending",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        0
+      ],
+      "id": "289b88fe-5f44-4e3a-af80-d84fd327c9f3",
+      "name": "Approval Still Pending?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "64b0608a-af45-4cdb-9aa3-c56deb70996f",
+              "leftValue": "={{ $json['Approval Request ID'] }}",
+              "rightValue": "={{ $('On form submission').first().json.approval_request_id }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "39df347e-90b7-4ff6-a045-d92c2bb9546a",
+      "name": "Find Submitted Approval"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "getRows",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{AF49088E-6692-424E-9AF3-73AB3A69BD8B}",
+          "mode": "list",
+          "cachedResultName": "Approval Log"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{B4ACD572-08F2-4A66-A8D5-5AFC28CBEB44}",
+          "mode": "list",
+          "cachedResultName": "ApprovalLog"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        -96
+      ],
+      "id": "2ceaf1cc-1f06-4fb1-947d-c4a04b8f5de0",
+      "name": "Get Sibling Approvals"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef04dd37-cd64-4520-8b1f-592485dc7487",
+              "leftValue": "={{ $json['Amendment Request ID'] }}",
+              "rightValue": "={{ $('Update Approval Decision').first().json['Amendment Request ID'] }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1344,
+        -96
+      ],
+      "id": "8152b13e-a329-412c-ab3d-76eb5ce60caa",
+      "name": "Find Approvals for Amendment"
+    },
+    {
+      "parameters": {
+        "resource": "worksheet",
+        "operation": "update",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{AF49088E-6692-424E-9AF3-73AB3A69BD8B}",
+          "mode": "list",
+          "cachedResultName": "Approval Log"
+        },
+        "columnToMatchOn": "Approval Request ID",
+        "valueToMatchOn": "={{ $json['Approval Request ID'] }}",
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "Approval Status",
+              "fieldValue": "={{ $('On form submission').first().json[\"Approval Decision\"] === \"Approve\" ? \"Approved\" : \"Rejected\" }}"
+            },
+            {
+              "column": "Decision At",
+              "fieldValue": "={{\nDate.UTC(\n  $now.setZone(\"Europe/London\").year,\n  $now.setZone(\"Europe/London\").month - 1,\n  $now.setZone(\"Europe/London\").day,\n  $now.setZone(\"Europe/London\").hour,\n  $now.setZone(\"Europe/London\").minute,\n  $now.setZone(\"Europe/London\").second\n) / 86400000 + 25569\n}}"
+            },
+            {
+              "column": "Decision By",
+              "fieldValue": "={{ $('On form submission').first().json['Approver Name'] }}"
+            },
+            {
+              "column": "Decision Comments",
+              "fieldValue": "={{ $('On form submission').first().json['Decision Comments'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        -96
+      ],
+      "id": "b68d37da-f809-46e5-b6d6-cf3e055d60d8",
+      "name": "Update Approval Decision"
+    },
+    {
+      "parameters": {
+        "jsCode": "const approvals = $input.all().map(item => ({ ...item.json }));\n\n// This is the row that Excel has just successfully updated.\nconst updatedApproval =\n  $('Update Approval Decision').first().json;\n\n// Replace the stale version of that approval in the fresh sibling read\n// with the actual output from the successful update.\nconst currentApprovals = approvals.map(row => {\n  if (\n    row['Approval Request ID'] ===\n    updatedApproval['Approval Request ID']\n  ) {\n    return {\n      ...row,\n      ...updatedApproval\n    };\n  }\n\n  return row;\n});\n\nconst statuses = currentApprovals.map(\n  row => row['Approval Status']\n);\n\nconst amendmentRequestId =\n  currentApprovals[0]['Amendment Request ID'];\n\nconst approvedCount =\n  statuses.filter(status => status === 'Approved').length;\n\nconst pendingCount =\n  statuses.filter(status => status === 'Pending').length;\n\nconst rejectedCount =\n  statuses.filter(status => status === 'Rejected').length;\n\nlet overallApprovalStatus;\nlet documentStatus;\n\nif (rejectedCount > 0) {\n  overallApprovalStatus = 'Rejected';\n  documentStatus = 'Blocked';\n} else if (pendingCount > 0) {\n  overallApprovalStatus = 'Pending';\n  documentStatus = 'Not Ready';\n} else {\n  overallApprovalStatus = 'Approved';\n  documentStatus = 'Ready for Generation';\n}\n\nreturn [\n  {\n    json: {\n      amendment_request_id: amendmentRequestId,\n      total_approvals: currentApprovals.length,\n      approved_count: approvedCount,\n      pending_count: pendingCount,\n      rejected_count: rejectedCount,\n      overall_approval_status: overallApprovalStatus,\n      document_status: documentStatus\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -96
+      ],
+      "id": "0e5c8482-a94c-467b-8501-2dd8dfd65df1",
+      "name": "Determine Overall Approval State"
+    },
+    {
+      "parameters": {
+        "resource": "worksheet",
+        "operation": "update",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{7B2CFAD2-4CF5-42B8-B200-E156AB0637A1}",
+          "mode": "list",
+          "cachedResultName": "Amendment Request Log"
+        },
+        "columnToMatchOn": "Amendment Request ID",
+        "valueToMatchOn": "={{ $json.amendment_request_id }}",
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "Overall Approval Status",
+              "fieldValue": "={{ $json.overall_approval_status }}"
+            },
+            {
+              "column": "Document Status",
+              "fieldValue": "={{ $json.document_status }}"
+            },
+            {
+              "column": "Approved At",
+              "fieldValue": "={{\n$('Determine Overall Approval State').first().json.overall_approval_status === 'Approved'\n?\nDate.UTC(\n  $now.setZone(\"Europe/London\").year,\n  $now.setZone(\"Europe/London\").month - 1,\n  $now.setZone(\"Europe/London\").day,\n  $now.setZone(\"Europe/London\").hour,\n  $now.setZone(\"Europe/London\").minute,\n  $now.setZone(\"Europe/London\").second\n) / 86400000 + 25569\n:\n''\n}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        -96
+      ],
+      "id": "db76001c-6544-4651-a406-dff0d04953d3",
+      "name": "Update Amendment Approval State"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Get rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get rows": {
+      "main": [
+        [
+          {
+            "node": "Find Submitted Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Submitted Approval": {
+      "main": [
+        [
+          {
+            "node": "Approval Still Pending?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approval Still Pending?": {
+      "main": [
+        [
+          {
+            "node": "Update Approval Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Sibling Approvals": {
+      "main": [
+        [
+          {
+            "node": "Find Approvals for Amendment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Approval Decision": {
+      "main": [
+        [
+          {
+            "node": "Get Sibling Approvals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Approvals for Amendment": {
+      "main": [
+        [
+          {
+            "node": "Determine Overall Approval State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Overall Approval State": {
+      "main": [
+        [
+          {
+            "node": "Update Amendment Approval State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}

@@ -1,0 +1,611 @@
+{
+  "name": "ContractOps 01 - Renewal Monitor",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "67f5c092-9bb3-49bd-bda4-98d955f8ebaf",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "fileId": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "6bf167c5-0304-42fb-b759-cb728fc13ad5",
+      "name": "Get a file"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8cc20463-6cc5-4037-9154-62cb7f4fd50f",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "=Active",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "4966ecb3-891e-44f9-9d2a-0d6fff932f5d",
+              "leftValue": "={{ $json[\"Renewal Decision\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c9984075-6012-4596-be97-fa56550dcbd0",
+              "leftValue": "={{ $json[\"Days to Notice Deadline\"] }}",
+              "rightValue": 90,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        656,
+        16
+      ],
+      "id": "e9691df2-9291-4277-93ce-6fccfd077004",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "getRows",
+        "workbook": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{00000000-0001-0000-0000-000000000000}",
+          "mode": "list",
+          "cachedResultName": "Contract Register"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{00000000-000C-0000-FFFF-FFFF00000000}",
+          "mode": "list",
+          "cachedResultName": "ContractRegister"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        16
+      ],
+      "id": "c84f5b69-dcf3-416d-9669-4fd6bbf84eb8",
+      "name": "Get Contract rows"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "getRows",
+        "workbook": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{00000000-0001-0000-0400-000000000000}",
+          "mode": "list",
+          "cachedResultName": "People"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{00000000-000C-0000-FFFF-FFFF02000000}",
+          "mode": "list",
+          "cachedResultName": "PeopleDirectory"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        224
+      ],
+      "id": "a288c47c-29bb-4ef5-a6f7-d5b38a99fc6b",
+      "name": "Get People rows"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Business Owner",
+              "field2": "Name"
+            }
+          ]
+        },
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        880,
+        16
+      ],
+      "id": "9395d10f-8474-43dc-b364-a363a663f943",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "493d668b-283b-4c55-81e8-2c88f11f0367",
+              "name": "Contract ID",
+              "value": "={{ $json[\"Contract ID\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "fdfabe0b-3e08-4607-8375-5a8e56096c78",
+              "name": "Supplier",
+              "value": "={{ $json.Supplier }}",
+              "type": "string"
+            },
+            {
+              "id": "6efeac04-dfbf-4781-b6c5-42f8e0e98ef0",
+              "name": "Business Owner",
+              "value": "={{ $json[\"Business Owner\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "48a9bb16-34de-469e-a3c6-114f95ce27da",
+              "name": "Email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "640424f3-fbad-4e23-aee7-86c797724b98",
+              "name": "Contract Manager/Associate",
+              "value": "={{ $json[\"Contract Manager/Associate\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "1c7d54ed-cf00-4d1a-9f27-4e559634c279",
+              "name": "Current Contract Value",
+              "value": "={{ $json[\"Current Contract Value\"] }}",
+              "type": "number"
+            },
+            {
+              "id": "3a1cb609-7081-4cd0-a408-0acf085f5498",
+              "name": "Expiry Date",
+              "value": "={{ new Date(($json[\"Expiry Date\"] - 25569) * 86400 * 1000).toLocaleDateString(\"en-GB\", { day: \"numeric\", month: \"long\", year: \"numeric\", timeZone: \"UTC\" }) }}",
+              "type": "string"
+            },
+            {
+              "id": "284ecb1e-2b21-44be-8eec-0030ae85be19",
+              "name": "Notice Deadline",
+              "value": "={{ new Date(($json[\"Notice Deadline\"] - 25569) * 86400 * 1000).toLocaleDateString(\"en-GB\", { day: \"numeric\", month: \"long\", year: \"numeric\", timeZone: \"UTC\" }) }}",
+              "type": "string"
+            },
+            {
+              "id": "12851782-6c93-4a4a-874d-49f5bab1b44c",
+              "name": "Days to Notice Deadline",
+              "value": "={{ $json[\"Days to Notice Deadline\"] }}",
+              "type": "number"
+            },
+            {
+              "id": "688c64f6-7d33-449a-b089-e665049344a6",
+              "name": "Risk Tier",
+              "value": "={{ $json[\"Risk Tier\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1104,
+        16
+      ],
+      "id": "a68fb87a-92c3-4abc-95ee-d1bbacd1822b",
+      "name": "Prepare renewal alert data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "70e5b8b1-2333-4ec7-b057-617c7863d55a",
+              "name": "=to_email",
+              "value": "={{ $json[\"Email\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "74868f13-2361-41a4-ba1c-8f62ce467b4d",
+              "name": "=alert_status",
+              "value": "={{ $json[\"Days to Notice Deadline\"] < 0 ? \"OVERDUE\" : $json[\"Days to Notice Deadline\"] < 30 ? \"URGENT\" : \"UPCOMING\" }}",
+              "type": "string"
+            },
+            {
+              "id": "c82ad380-7bf0-4156-a815-1aca68f483b2",
+              "name": "=alert_subject",
+              "value": "={{  $json[\"Days to Notice Deadline\"] < 0 ? \"OVERDUE: \" + $json[\"Contract ID\"] + \" – \" + $json[\"Supplier\"] + \" renewal decision\" : $json[\"Days to Notice Deadline\"] < 30 ? \"URGENT: \" + $json[\"Contract ID\"] + \" – \" + $json[\"Supplier\"] + \" renewal decision\" : \"Action required: \" + $json[\"Contract ID\"] + \" – \" + $json[\"Supplier\"] + \" renewal decision\" }}",
+              "type": "string"
+            },
+            {
+              "id": "98d848fb-71a5-4670-a9ba-c80b18e9dff9",
+              "name": "=alert_body",
+              "value": "={{ `Hi ${$json[\"Business Owner\"]},\n\nContract ${$json[\"Contract ID\"]} with ${$json[\"Supplier\"]} requires a renewal decision.\n\nExpiry date: ${$json[\"Expiry Date\"]}\nNotice deadline: ${$json[\"Notice Deadline\"]}\nDays to notice deadline: ${$json[\"Days to Notice Deadline\"]}\nCurrent contract value: ${new Intl.NumberFormat(\"en-GB\", { style: \"currency\", currency: \"GBP\", maximumFractionDigits: 0 }).format($json[\"Current Contract Value\"])}\nRisk tier: ${$json[\"Risk Tier\"]}\n\nPlease review the contract and record one of the following decisions:\n\n• Renew unchanged\n• Renew with amendments\n• Do not renew\n• Terminate\n\nContract Manager/Associate: ${$json[\"Contract Manager/Associate\"]}\n\nThis notification was generated automatically by ContractOps.` }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1328,
+        16
+      ],
+      "id": "e4b1932f-aadc-4634-8ec3-e9f41d46930b",
+      "name": "Build renewal alert"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.alert_status }}",
+                    "rightValue": "OVERDUE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a55ce96f-9a28-4cbf-bebc-7d32e3ed7e90"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "eb34b9b2-8da4-4af2-8507-0f1caf85fae9",
+                    "leftValue": "={{ $json.alert_status }}",
+                    "rightValue": "URGENT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bc1497db-c63a-46fa-b2bf-f971b566405e",
+                    "leftValue": "={{ $json.alert_status }}",
+                    "rightValue": "UPCOMING",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1552,
+        16
+      ],
+      "id": "b2280cd6-044c-418e-b70d-1b8acff41836",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7d9f9898-44b3-42ed-bb0d-428f75e28c6a",
+              "name": "notification_route",
+              "value": "Overdue Renewal Escalation",
+              "type": "string"
+            },
+            {
+              "id": "0e0e29f0-0ef8-4f17-bc09-dcd153f09d36",
+              "name": "escalate_to_contract_manager",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "92702765-a0ca-4d88-9b47-2cdd9e28aa78",
+              "name": "requires_immediate_review",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1776,
+        -176
+      ],
+      "id": "16c7283a-bf6d-45cb-a8f0-989134c50fcf",
+      "name": "Overdue Renewal Escalation"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e071b298-48af-400d-8463-5260d8eeccd3",
+              "name": "notification_route",
+              "value": "Urgent Renewal Reminder",
+              "type": "string"
+            },
+            {
+              "id": "69dc3987-0808-4b1e-9cd9-f134b9d5420d",
+              "name": "escalate_to_contract_manager",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "035459bb-578a-42d2-9779-33b0c5d42886",
+              "name": "requires_immediate_review",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1776,
+        32
+      ],
+      "id": "812b6d41-e13d-4017-b883-61c7effb8cd5",
+      "name": "Urgent Renewal"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c531a037-4f35-43cc-8fbd-61b07953eff1",
+              "name": "notification_route",
+              "value": "Standard Renewal Reminder",
+              "type": "string"
+            },
+            {
+              "id": "89a4866f-147e-4f0c-a1e9-426aab78a83a",
+              "name": "escalation_to_contract_manager",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "b454d4f7-1252-49a9-94d7-29325048231e",
+              "name": "requires_immediate_review",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1776,
+        224
+      ],
+      "id": "fc7394e6-5806-4d7a-adea-d089b5b80b80",
+      "name": "Upcoming Renewal"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Get Contract rows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get People rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contract rows": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get People rows": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Prepare renewal alert data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare renewal alert data": {
+      "main": [
+        [
+          {
+            "node": "Build renewal alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build renewal alert": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Overdue Renewal Escalation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Urgent Renewal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upcoming Renewal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}

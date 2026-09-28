@@ -1,0 +1,431 @@
+{
+  "name": "ContractOps 05 – Amendment Execution & Register Update",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "ContractOps – Record Amendment Execution",
+        "formDescription": "Confirm that an approved amendment has been fully executed by all parties.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Amendment Request ID",
+              "fieldName": "amendment_request_id",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Execution Date",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Executed By",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fd37aafa-47e2-4d38-803a-a07eaa51cba0",
+      "name": "On form submission"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "getRows",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{7B2CFAD2-4CF5-42B8-B200-E156AB0637A1}",
+          "mode": "list",
+          "cachedResultName": "Amendment Request Log"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{3E6FA594-856C-41FA-8BBD-E29AD3BE5DA2}",
+          "mode": "list",
+          "cachedResultName": "AmdRequests"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "8903cb11-ebea-4323-9d8c-db84f20fe17c",
+      "name": "Get rows"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "502a0865-764f-45d8-9c55-0fb8f393e35c",
+              "leftValue": "={{ $json['Amendment Request ID'] }}",
+              "rightValue": "={{ $('On form submission').first().json.amendment_request_id }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "a397fead-208a-4b06-b44d-d5c68731ef2f",
+      "name": "Find Submitted Amendment"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "53696ba4-3c13-4b31-8d9d-392ba6f03f56",
+              "leftValue": "={{ $json['Overall Approval Status'] }}",
+              "rightValue": "Approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "4811a3e2-31be-4662-9d2a-1d3fb34a1a30",
+              "leftValue": "={{ $json['Document Status'] }}",
+              "rightValue": "Draft Generated",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        0
+      ],
+      "id": "203c0cea-b475-40fa-a37a-61139184f13d",
+      "name": "Amendment Ready for Execution?"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "getRows",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{00000000-0001-0000-0000-000000000000}",
+          "mode": "list",
+          "cachedResultName": "Contract Register"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{00000000-000C-0000-FFFF-FFFF00000000}",
+          "mode": "list",
+          "cachedResultName": "ContractRegister"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        -96
+      ],
+      "id": "2f62e0df-93cb-41b0-9436-d5f0c6d497cc",
+      "name": "Get rows1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d7c238de-a28e-42e5-93ee-2a94a0116c75",
+              "leftValue": "={{ $json['Contract ID'] }}",
+              "rightValue": "={{ $('Find Submitted Amendment').first().json['Contract ID'] }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        -160
+      ],
+      "id": "1ce8cd6f-f1ae-40ca-95c0-476417fba7c3",
+      "name": "Find Contract to Update"
+    },
+    {
+      "parameters": {
+        "resource": "worksheet",
+        "operation": "update",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{7B2CFAD2-4CF5-42B8-B200-E156AB0637A1}",
+          "mode": "list",
+          "cachedResultName": "Amendment Request Log"
+        },
+        "columnToMatchOn": "Amendment Request ID",
+        "valueToMatchOn": "={{ $('On form submission').first().json.amendment_request_id }}",
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "Document Status",
+              "fieldValue": "Executed"
+            },
+            {
+              "column": "Executed On",
+              "fieldValue": "={{\nDate.UTC(\n  Number($('On form submission').first().json[\"Execution Date\"].slice(0,4)),\n  Number($('On form submission').first().json[\"Execution Date\"].slice(5,7)) - 1,\n  Number($('On form submission').first().json[\"Execution Date\"].slice(8,10))\n) / 86400000 + 25569\n}}"
+            },
+            {
+              "column": "Executed By",
+              "fieldValue": "={{ $('On form submission').first().json['Executed By'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        1520,
+        80
+      ],
+      "id": "277b49f9-bd1a-4b5e-ab3c-3249bc2340ee",
+      "name": "Mark Amendment Executed"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{00000000-0001-0000-0100-000000000000}",
+          "mode": "list",
+          "cachedResultName": "Audit Log"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{00000000-000C-0000-FFFF-FFFF01000000}",
+          "mode": "list",
+          "cachedResultName": "AuditLog"
+        },
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "Timestamp",
+              "fieldValue": "={{\nDate.UTC(\n  $now.setZone(\"Europe/London\").year,\n  $now.setZone(\"Europe/London\").month - 1,\n  $now.setZone(\"Europe/London\").day,\n  $now.setZone(\"Europe/London\").hour,\n  $now.setZone(\"Europe/London\").minute,\n  $now.setZone(\"Europe/London\").second\n) / 86400000 + 25569\n}}"
+            },
+            {
+              "column": "Contract ID",
+              "fieldValue": "={{ $('Find Submitted Amendment').first().json['Contract ID'] }}"
+            },
+            {
+              "column": "Event",
+              "fieldValue": "Amendment Executed"
+            },
+            {
+              "column": "Triggered By",
+              "fieldValue": "={{ $('On form submission').first().json['Executed By'] }}"
+            },
+            {
+              "column": "Outcome / Detail",
+              "fieldValue": "={{ (() => {\n\nconst amendment = $('Find Submitted Amendment').first().json;\nconst contract = $('Find Contract to Update').first().json;\n\nconst currentValue = Number(contract[\"Current Contract Value\"]);\nconst proposedValue = Number(amendment[\"Proposed Contract Value\"]);\n\nlet valueText;\n\nif (proposedValue > currentValue) {\n  valueText =\n    `Contract value increased from £${currentValue.toLocaleString(\"en-GB\")} ` +\n    `to £${proposedValue.toLocaleString(\"en-GB\")}.`;\n} else if (proposedValue < currentValue) {\n  valueText =\n    `Contract value decreased from £${currentValue.toLocaleString(\"en-GB\")} ` +\n    `to £${proposedValue.toLocaleString(\"en-GB\")}.`;\n} else {\n  valueText =\n    `Contract value remains £${proposedValue.toLocaleString(\"en-GB\")}.`;\n}\n\nconst currentPD = amendment[\"Current Personal Data\"];\nconst proposedPD = amendment[\"Proposed Personal Data\"];\n\nlet personalDataText;\n\nif (currentPD === \"Yes\" && proposedPD === \"Yes\") {\n  personalDataText = \"Personal data processing remains included.\";\n} else if (currentPD === \"No\" && proposedPD === \"Yes\") {\n  personalDataText = \"Personal data processing has been introduced.\";\n} else if (currentPD === \"Yes\" && proposedPD === \"No\") {\n  personalDataText = \"Personal data processing has been removed.\";\n} else {\n  personalDataText = \"Personal data processing remains excluded.\";\n}\n\nconst newVersion = Number(contract[\"Current Version\"]) + 1;\n\nconst expirySerial = Number(amendment[\"Proposed Expiry Date\"]);\nconst expiryDate = new Date((expirySerial - 25569) * 86400 * 1000);\n\nconst expiryText = expiryDate.toLocaleDateString(\"en-GB\", {\n  day: \"numeric\",\n  month: \"long\",\n  year: \"numeric\",\n  timeZone: \"UTC\"\n});\n\nreturn (\n  `Amendment ${amendment[\"Amendment Request ID\"]} executed. ` +\n  `${valueText} ` +\n  `${personalDataText} ` +\n  `Contract version ${newVersion} expires on ${expiryText}.`\n);\n\n})() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        1664,
+        -96
+      ],
+      "id": "7f43f16b-d0f3-494b-8838-4b15fbeba829",
+      "name": "Audit Log Entry"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{\n'https://graph.microsoft.com/v1.0/me/drive/root:/Documents/ContractOps/ContractOps_Demo.xlsx:/workbook/worksheets(\\'Contract Register\\')/range(address=\\'H' +\n(\n  $('Get rows1').all().findIndex(\n    item => item.json['Contract ID'] === $json['Contract ID']\n  ) + 2\n) +\n':V' +\n(\n  $('Get rows1').all().findIndex(\n    item => item.json['Contract ID'] === $json['Contract ID']\n  ) + 2\n) +\n'\\')'\n}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftExcelOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  values: [[\n\n    // H - Current Contract Value\n    Number(\n      $('Find Submitted Amendment')\n        .first()\n        .json['Proposed Contract Value']\n    ),\n\n    // I - Start Date\n    null,\n\n    // J - Fully Executed Date\n    null,\n\n    // K - Expiry Date\n    Number(\n      $('Find Submitted Amendment')\n        .first()\n        .json['Proposed Expiry Date']\n    ),\n\n    // L - Notice Period\n    null,\n\n    // M - Notice Deadline FORMULA - preserve\n    null,\n\n    // N - Days to Notice Deadline FORMULA - preserve\n    null,\n\n    // O - Auto-Renewal\n    null,\n\n    // P - Personal Data\n    $('Find Submitted Amendment')\n      .first()\n      .json['Proposed Personal Data'],\n\n    // Q - Supplier Access\n    null,\n\n    // R - Critical Service\n    null,\n\n    // S - Risk Tier FORMULA - preserve\n    null,\n\n    // T - Status\n    null,\n\n    // U - Current Version\n    Number($json['Current Version']) + 1,\n\n    // V - Last Amended Date\n    Date.UTC(\n      Number(\n        $('On form submission')\n          .first()\n          .json['Execution Date']\n          .slice(0,4)\n      ),\n      Number(\n        $('On form submission')\n          .first()\n          .json['Execution Date']\n          .slice(5,7)\n      ) - 1,\n      Number(\n        $('On form submission')\n          .first()\n          .json['Execution Date']\n          .slice(8,10)\n      )\n    ) / 86400000 + 25569\n\n  ]]\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1328,
+        -96
+      ],
+      "id": "77ea30e8-364c-4b6b-971f-52e3c863b762",
+      "name": "Apply Executed Amendment via Graph"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Get rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get rows": {
+      "main": [
+        [
+          {
+            "node": "Find Submitted Amendment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Submitted Amendment": {
+      "main": [
+        [
+          {
+            "node": "Amendment Ready for Execution?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Amendment Ready for Execution?": {
+      "main": [
+        [
+          {
+            "node": "Get rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get rows1": {
+      "main": [
+        [
+          {
+            "node": "Find Contract to Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Contract to Update": {
+      "main": [
+        [
+          {
+            "node": "Apply Executed Amendment via Graph",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Amendment Executed": {
+      "main": [
+        [
+          {
+            "node": "Audit Log Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Executed Amendment via Graph": {
+      "main": [
+        [
+          {
+            "node": "Mark Amendment Executed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}

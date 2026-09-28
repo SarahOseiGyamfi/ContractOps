@@ -1,0 +1,16 @@
+# Local/runtime files
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Generated documents are runtime output; the curated sample lives in /sample
+generated_documents/*.docx
+!generated_documents/.gitkeep
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

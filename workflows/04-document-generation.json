@@ -1,0 +1,434 @@
+{
+  "name": "ContractOps 04 - Amendment Document Generation",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "20962535-d488-4938-8cc4-b5e3b415d956",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "getRows",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{7B2CFAD2-4CF5-42B8-B200-E156AB0637A1}",
+          "mode": "list",
+          "cachedResultName": "Amendment Request Log"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{3E6FA594-856C-41FA-8BBD-E29AD3BE5DA2}",
+          "mode": "list",
+          "cachedResultName": "AmdRequests"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "08832c03-7262-4c29-900f-edf994d66798",
+      "name": "Get rows"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "744935e4-073f-4eaa-a3a3-2a428b74f533",
+              "leftValue": "={{ $json['Overall Approval Status'] }}",
+              "rightValue": "Approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a91e99a3-c548-4567-9519-d61f2ea65c5e",
+              "leftValue": "={{ $json['Document Status'] }}",
+              "rightValue": "Ready for Generation",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "1c009614-2beb-4d58-a064-1b753be155ba",
+      "name": "Find Ready Amendments"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "060d22ca-c3be-42b2-9189-d95790130098",
+              "name": "Amendment Request ID",
+              "value": "={{ $json['Amendment Request ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "56886630-0f38-4594-a925-81621cd88010",
+              "name": "Contract ID",
+              "value": "={{ $json['Contract ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "c00f845c-c778-4bb9-baa7-d14f6e4af495",
+              "name": "Supplier",
+              "value": "={{ $json.Supplier }}",
+              "type": "string"
+            },
+            {
+              "id": "a3335ce7-15a1-46a6-8c55-9ffc1d9c06d5",
+              "name": "Current Contract Value",
+              "value": "={{ $json['Current Contract Value'] }}",
+              "type": "number"
+            },
+            {
+              "id": "7db8f0d3-f4c1-4d37-9010-0a5cfb31af19",
+              "name": "Proposed Contract Value",
+              "value": "={{ $json['Proposed Contract Value'] }}",
+              "type": "number"
+            },
+            {
+              "id": "aeeb3624-14ec-4fb6-b0a1-38ab719a5e23",
+              "name": "Current Expiry Date",
+              "value": "={{ $json['Current Expiry Date'] }}",
+              "type": "number"
+            },
+            {
+              "id": "3a37d61a-f5c9-4903-9ed1-2c839ecaffac",
+              "name": "Proposed Expiry Date",
+              "value": "={{ $json['Proposed Expiry Date'] }}",
+              "type": "number"
+            },
+            {
+              "id": "97bc300e-edb0-4dbf-a754-8fcba3c35888",
+              "name": "Amendment Description",
+              "value": "={{ $json['Amendment Description'] }}",
+              "type": "string"
+            },
+            {
+              "id": "6e6f7139-322f-4781-80dd-822547af8fb0",
+              "name": "Approved At ",
+              "value": "={{ $json['Approved At'] }}",
+              "type": "string"
+            },
+            {
+              "id": "1bbcf1c8-291f-4732-a134-a6c5695eb713",
+              "name": "effective_date",
+              "value": "={{ $now.setZone(\"Europe/London\").toFormat(\"yyyy-MM-dd\") }}",
+              "type": "string"
+            },
+            {
+              "id": "90e5003e-f628-41b0-a984-cc7bcb56af39",
+              "name": "document_filename",
+              "value": "={{ $json['Contract ID'] + \"_Amendment_001.docx\"}} ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "ca200e9b-a9c0-4a1b-bc94-fc3c5eb5fe3d",
+      "name": "Prepare Document Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({\n  json: {\n    ...item.json,\n    payload_base64: Buffer\n      .from(JSON.stringify(item.json), 'utf8')\n      .toString('base64')\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        0
+      ],
+      "id": "a6008506-cb26-4120-a722-e46a123c8cea",
+      "name": "Encode Document Payload"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=python \"C:\\path\\to\\ContractOps\\scripts\\generate_amendment.py\" \"{{$json.payload_base64}}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "6006546c-1482-48f0-95a8-d3f916657633",
+      "name": "Generate Amendment DOCX"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "26a7e926-d032-45d2-914d-8a1217aa547e",
+              "leftValue": "={{ $json.exitCode }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "baf46c3f-485c-4e65-b2ca-b810cfc14244",
+      "name": "Document Generated Successfully?"
+    },
+    {
+      "parameters": {
+        "resource": "worksheet",
+        "operation": "update",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{7B2CFAD2-4CF5-42B8-B200-E156AB0637A1}",
+          "mode": "list",
+          "cachedResultName": "Amendment Request Log"
+        },
+        "columnToMatchOn": "Amendment Request ID",
+        "valueToMatchOn": "={{ $('Prepare Document Data').first().json['Amendment Request ID'] }}",
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "Document Status",
+              "fieldValue": "Draft Generated"
+            },
+            {
+              "column": "Generated At",
+              "fieldValue": "={{\nDate.UTC(\n  $now.setZone(\"Europe/London\").year,\n  $now.setZone(\"Europe/London\").month - 1,\n  $now.setZone(\"Europe/London\").day,\n  $now.setZone(\"Europe/London\").hour,\n  $now.setZone(\"Europe/London\").minute,\n  $now.setZone(\"Europe/London\").second\n) / 86400000 + 25569\n}}"
+            },
+            {
+              "column": "Document Filename",
+              "fieldValue": "={{ $('Prepare Document Data').first().json[\"document_filename\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        1568,
+        -96
+      ],
+      "id": "4009a0a0-275a-415e-b629-4d5d665796c4",
+      "name": "Mark Amendment Draft Generated"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "workbook": {
+          "__rl": true,
+          "value": "REPLACE_WITH_ONEDRIVE_WORKBOOK_ID",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{00000000-0001-0000-0100-000000000000}",
+          "mode": "list",
+          "cachedResultName": "Audit Log"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{00000000-000C-0000-FFFF-FFFF01000000}",
+          "mode": "list",
+          "cachedResultName": "AuditLog"
+        },
+        "fieldsUi": {
+          "values": [
+            {
+              "column": "Timestamp",
+              "fieldValue": "={{ \nDate.UTC(\n  $now.setZone(\"Europe/London\").year,\n  $now.setZone(\"Europe/London\").month - 1,\n  $now.setZone(\"Europe/London\").day,\n  $now.setZone(\"Europe/London\").hour,\n  $now.setZone(\"Europe/London\").minute,\n  $now.setZone(\"Europe/London\").second\n) / 86400000 + 25569\n}}"
+            },
+            {
+              "column": "Contract ID",
+              "fieldValue": "={{ $json['Contract ID'] }}"
+            },
+            {
+              "column": "Event",
+              "fieldValue": "={{ \"Amendment \" + $json['Document Status'] }}"
+            },
+            {
+              "column": "Triggered By",
+              "fieldValue": "n8n (via ContractOps)"
+            },
+            {
+              "column": "Outcome / Detail",
+              "fieldValue": "={{ \"Saved as \" + \"'\" +$json['Document Filename']+ \"'\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        -96
+      ],
+      "id": "84a4dace-4b83-4bb7-a0de-ff80ba649217",
+      "name": "Audit Log"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get rows": {
+      "main": [
+        [
+          {
+            "node": "Find Ready Amendments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Ready Amendments": {
+      "main": [
+        [
+          {
+            "node": "Prepare Document Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Document Data": {
+      "main": [
+        [
+          {
+            "node": "Encode Document Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Encode Document Payload": {
+      "main": [
+        [
+          {
+            "node": "Generate Amendment DOCX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Amendment DOCX": {
+      "main": [
+        [
+          {
+            "node": "Document Generated Successfully?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Generated Successfully?": {
+      "main": [
+        [
+          {
+            "node": "Mark Amendment Draft Generated",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Amendment Draft Generated": {
+      "main": [
+        [
+          {
+            "node": "Audit Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
